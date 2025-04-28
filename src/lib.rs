@@ -4,6 +4,7 @@
 //! algorithms. For details of the various algorithms,
 //! consult the [nlopt docs](https://nlopt.readthedocs.io/en/latest/NLopt_Algorithms/)
 
+use std::ffi::CStr;
 use std::os::raw::{c_uint, c_ulong, c_void};
 use std::slice;
 
@@ -767,6 +768,17 @@ impl<F: ObjFn<T>, T> Nlopt<F, T> {
 
     pub fn get_population(&mut self) -> usize {
         unsafe { sys::nlopt_get_population(self.nloptc_obj.0) as usize }
+    }
+
+    pub fn get_error_message(&self) -> Option<String> {
+        unsafe {
+            let ptr = sys::nlopt_get_errmsg(self.nloptc_obj.0);
+            if ptr.is_null() {
+                None
+            } else {
+                Some(CStr::from_ptr(ptr).to_string_lossy().into_owned())
+            }
+        }
     }
 
     // Pseudorandom Numbers
